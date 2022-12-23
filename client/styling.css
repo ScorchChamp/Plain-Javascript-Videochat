@@ -1,0 +1,23 @@
+body {
+    background-color: rgb(183, 244, 255);
+}
+
+.video-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+
+.video-container {
+    background-color: gray;
+    margin: 5%;
+    padding: 10px;
+}
+
+.video-container video {
+    max-height: 300px;
+    margin: 10px;
+}
+
+.video-overlay {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
