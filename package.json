@@ -1,0 +1,23 @@
+{
+  "name": "plain-javascript-videochat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ScorchChamp/Plain-Javascript-Videochat.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ScorchChamp/Plain-Javascript-Videochat/issues"
+  },
+  "homepage": "https://github.com/ScorchChamp/Plain-Javascript-Videochat#readme",
+  "dependencies": {
+    "ws": "^8.11.0"
+  }
+}

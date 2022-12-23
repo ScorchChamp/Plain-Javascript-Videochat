@@ -1,0 +1,101 @@
+<html>
+  <head>
+    <style>
+      /* Add some basic styling for the video chat interface */
+      body {
+        background-color: rgb(183, 244, 255);
+      }
+      .video-wrapper {
+        display: flex;
+        flex-direction: row;
+      }
+      .video-container {
+        /* width: auto; */
+        background-color: gray;
+        margin: 5%;
+        padding: 10px;
+      }
+      .video-container video {
+        max-height: 300px;
+        margin: 10px;
+      }
+      .video-overlay {
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Add video elements for the local and remote streams -->
+    <div class="video-wrapper">
+        <div class="video-container">
+            <div class="video-overlay">You</div>
+            <video class="local-video" autoplay>test</video>
+        </div>
+        <div class="video-container">
+            <div class="video-overlay">Them</div>
+            <video class="remote-video" autoplay></video>
+        </div>
+    </div>
+    <script>
+      // Set up the WebRTC connection
+      const localVideo = document.querySelector('.local-video');
+      const remoteVideo = document.querySelector('.remote-video');
+      let pc;
+
+      // Set up the signaling server
+      const socket = new WebSocket('ws://192.168.1.37:8080');
+      socket.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+        if (message.sdp) {
+          pc.setRemoteDescription(new RTCSessionDescription(message.sdp)).then(() => {
+            // Only create answers in response to offers
+            if (message.sdp.type === 'offer') {
+              pc.createAnswer().then(localDescCreated).catch(onError);
+            }
+          }).catch(onError);
+        } else if (message.candidate) {
+          pc.addIceCandidate(new RTCIceCandidate(message.candidate)).catch(onError);
+        }
+      };
+
+      function localDescCreated(desc) {
+        pc.setLocalDescription(
+          desc,
+          () => socket.send(JSON.stringify({ sdp: pc.localDescription })),
+          onError
+        );
+      }
+
+      // Set up the local video stream
+      navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true
+      }).then(stream => {
+        // Show the local video stream in the local video element
+        localVideo.srcObject = stream;
+
+        // Set up the peer connection
+        pc = new RTCPeerConnection();
+        pc.onicecandidate = function(event) {
+          if (event.candidate) {
+            socket.send(JSON.stringify({ candidate: event.candidate }));
+          }
+        };
+        pc.onaddstream = function(event) {
+          // Show the remote video stream in the remote video element
+          remoteVideo.srcObject = event.stream;
+        };
+
+        // Add the local stream to the peer connection
+        pc.addStream(stream);
+
+        // Send an offer to the other client
+        pc.createOffer().then(localDescCreated).catch(onError);
+      }).catch(onError);
+
+      function onError(error) {
+        console.error(error);
+      }
+    </script>
+  </body>
+</html>
